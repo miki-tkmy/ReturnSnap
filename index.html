@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReturnSnap - Portal</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 0 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+    button {
+      background: #1a237e;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:disabled {
+      background: #ccc;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      max-height: 250px;
+    }
+    .status {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: gray;
+      margin-right: 8px;
+    }
+    .status.online { background: green; }
+    .status.offline { background: red; }
+  </style>
+  <script type="module" crossorigin src="/ReturnSnap/assets/main-ZcnfCgVc.js"></script>
+  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/capability-check-DaB2OGDN.js">
+<script id="vite-plugin-pwa:register-sw" src="/ReturnSnap/registerSW.js"></script></head>
+<body>
+  <h1>ReturnSnap ポータル</h1>
+  
+  <div class="card">
+    <h2>通信PoCテスト (Phase 1)</h2>
+    <p>GAS WebApp URLを入力し、「1. ブリッジ初期化」を行った後に「2. PING送信」を押してください。</p>
+    <label for="gasUrl">GAS WebApp URL (Bridge.htmlを配信するWebAppのURL):</label>
+    <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <button id="btnConnect">1. ブリッジ初期化</button>
+    <button id="btnPing" disabled>2. PING送信</button>
+    
+    <h3>通信ログ:</h3>
+    <pre id="log">ログがここに表示されます...</pre>
+  </div>
+
+  <div class="card">
+    <h2>ストレージ診断 (Phase 2)</h2>
+    <p>ブラウザの保存能力や空き容量、PWA対応状況をテストします。</p>
+    <button id="btnCheckStorage">ストレージ診断を実行</button>
+  </div>
+
+  <div class="card">
+    <h2>未送信データの同期アップロード (Phase 5)</h2>
+    <p>端末に保存されている未送信の下書き（写真データ）をGAS経由でアップロードします。</p>
+    <p>現在のネットワーク状態: <span id="networkStatus" class="status"></span><span id="networkText">判定中...</span></p>
+    <div style="margin: 15px 0;">
+      <span id="syncBadge" class="status" style="background: #fb8c00; width: auto; height: auto; padding: 4px 10px; border-radius: 12px; color: white; font-weight: bold; font-size: 13px; display: none;">0件の未送信データ</span>
+    </div>
+    <button id="btnSync" class="btn" style="background: #1a237e; color: white; padding: 10px 20px; border-radius: 4px; border: none; cursor: pointer; font-size: 16px; width: auto;">同期アップロードを開始</button>
+  </div>
+
+  <div class="card">
+    <h2>アプリ起動リンク</h2>
+    <ul>
+      <li><a href="./count/">ReturnSnap Count (員数担当者用)</a></li>
+      <li><a href="./lift/">ReturnSnap Lift (リフトマン用)</a></li>
+    </ul>
+  </div>
+
+</body>
+</html>
