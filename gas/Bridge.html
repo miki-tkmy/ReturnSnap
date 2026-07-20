@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <script>
+    // 許可する送信元 (GitHub Pagesのオリジンとローカル開発サーバー)
+    const ALLOWED_ORIGINS = [
+      'https://miki-tkmy.github.io',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:3000'
+    ];
+
+    // GASテンプレートから展開される親のオリジン
+    const TEMPLATE_ORIGIN = "<?= parentOrigin ?>";
+
+    // クエリパラメータまたは referrer から親のオリジンを特定します
+    function getParentOrigin() {
+      // 1. テンプレート変数に値がある場合
+      if (TEMPLATE_ORIGIN && TEMPLATE_ORIGIN.indexOf('http') === 0) {
+        return TEMPLATE_ORIGIN;
+      }
+
+      // 2. クエリパラメータから origin を抽出
+      var params = {};
+      var search = window.location.search.substring(1);
+      if (search) {
+        var pairs = search.split('&');
+        for (var i = 0; i < pairs.length; i++) {
+          var pair = pairs[i].split('=');
+          params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+        }
+      }
+      
+      if (params.origin) {
+        return params.origin;
+      }
+      
+      // 3. document.referrer から抽出
+      if (document.referrer) {
+        for (var j = 0; j < ALLOWED_ORIGINS.length; j++) {
+          if (document.referrer.indexOf(ALLOWED_ORIGINS[j]) === 0) {
+            return ALLOWED_ORIGINS[j];
+          }
+        }
+      }
+      
+      return null;
+    }
+
+    // 親ウィンドウのオリジンを特定して、準備完了メッセージを送信します (ハンドシェイク)
+    (function notifyReady() {
+      var parentOrigin = getParentOrigin();
+      
+      // ホワイトリスト検証
+      var isAllowed = false;
+      if (parentOrigin) {
+        isAllowed = ALLOWED_ORIGINS.some(function(origin) {
+          return parentOrigin === origin || parentOrigin.indexOf(origin) === 0;
+        });
+      }
+
+      // window.parent ではなく window.top を使用して、多重iframeを抜けて最上位（Portal）に送信します
+      if (isAllowed && window.top) {
+        window.top.postMessage({ action: 'bridgeReady', success: true }, parentOrigin);
+      } else {
+        // 特定できない場合は本番用フォールバック
+        if (window.top) {
+          window.top.postMessage({ action: 'bridgeReady', success: true }, 'https://miki-tkmy.github.io');
+        }
+      }
+    })();
+
+    window.addEventListener('message', function(event) {
+      // 1. オリジンの検証
+      const isAllowed = ALLOWED_ORIGINS.some(function(origin) {
+        return event.origin === origin || event.origin.startsWith(origin);
+      });
+
+      if (!isAllowed) {
+        console.warn('Blocked message from unauthorized origin:', event.origin);
+        return;
+      }
+
+      var request = event.data;
+      if (!request || typeof request !== 'object' || !request.action || !request.requestId) {
+        return;
+      }
+
+google.script.run.debugLog("Received request: " + request.action + ", ID: " + request.requestId);
+      // 2. 呼び出し可能な関数の検証 (ホワイトリスト制限)
+      var allowedFunctions = [
+        'healthCheck',
+        'createDraft',
+        'uploadPhoto',
+        'completeDraft'
+      ];
+
+      if (allowedFunctions.indexOf(request.action) === -1) {
+        sendError(
+          window.top, 
+          event.origin, 
+          request.requestId, 
+          request.action, 
+          'ACTION_NOT_ALLOWED', 
+          'The requested action is not allowed'
+        );
+        return;
+      }
+
+      // 3. GASの公開関数の呼び出し
+      google.script.run
+        .withSuccessHandler(function(result) {
+          // 成功時に結果を親ウィンドウに返す (event.sourceはラッパーフレームなので window.top に返す)
+          sendResponse(window.top, event.origin, result);
+        })
+        .withFailureHandler(function(error) {
+          // エラー時にエラーオブジェクトを親ウィンドウに返す
+          sendError(
+            window.top, 
+            event.origin, 
+            request.requestId, 
+            request.action, 
+            'SERVER_ERROR', 
+            error.message || error.toString()
+          );
+        })
+        [request.action](request);
+    });
+
+    function sendResponse(targetWindow, targetOrigin, response) {
+      if (targetWindow) {
+        targetWindow.postMessage(response, targetOrigin);
+      }
+    }
+
+    function sendError(targetWindow, targetOrigin, requestId, action, code, message) {
+      var errorResponse = {
+        action: action,
+        requestId: requestId,
+        success: false,
+        error: {
+          code: code,
+          message: message
+        }
+      };
+      sendResponse(targetWindow, targetOrigin, errorResponse);
+    }
+  </script>
+</head>
+<body>
+  <!-- ブリッジ用の非表示画面のためUIは持ちません -->
+</body>
+</html>

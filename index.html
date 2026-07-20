@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReturnSnap - Portal</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 0 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+    button {
+      background: #1a237e;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:disabled {
+      background: #ccc;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      max-height: 250px;
+    }
+    .status {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: gray;
+      margin-right: 8px;
+    }
+    .status.online { background: green; }
+    .status.offline { background: red; }
+  </style>
+</head>
+<body>
+  <h1>ReturnSnap ポータル</h1>
+  
+  <div class="card">
+    <h2>通信PoCテスト (Phase 1)</h2>
+    <p>GAS WebApp URLを入力し、「1. ブリッジ初期化」を行った後に「2. PING送信」を押してください。</p>
+    <label for="gasUrl">GAS WebApp URL (Bridge.htmlを配信するWebAppのURL):</label>
+    <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <button id="btnConnect">1. ブリッジ初期化</button>
+    <button id="btnPing" disabled>2. PING送信</button>
+    
+    <h3>通信ログ:</h3>
+    <pre id="log">ログがここに表示されます...</pre>
+  </div>
+
+  <div class="card">
+    <h2>ストレージ診断 (Phase 2)</h2>
+    <p>ブラウザの保存能力や空き容量、PWA対応状況をテストします。</p>
+    <button id="btnCheckStorage">ストレージ診断を実行</button>
+  </div>
+
+  <div class="card">
+    <h2>未送信データの同期アップロード (Phase 5)</h2>
+    <p>端末に保存されている未送信の下書き（写真データ）をGAS経由でアップロードします。</p>
+    <p>現在のネットワーク状態: <span id="networkStatus" class="status"></span><span id="networkText">判定中...</span></p>
+    <div style="margin: 15px 0;">
+      <span id="syncBadge" class="status" style="background: #fb8c00; width: auto; height: auto; padding: 4px 10px; border-radius: 12px; color: white; font-weight: bold; font-size: 13px; display: none;">0件の未送信データ</span>
+    </div>
+    <button id="btnSync" class="btn" style="background: #1a237e; color: white; padding: 10px 20px; border-radius: 4px; border: none; cursor: pointer; font-size: 16px; width: auto;">同期アップロードを開始</button>
+  </div>
+
+  <div class="card">
+    <h2>アプリ起動リンク</h2>
+    <ul>
+      <li><a href="./count/">ReturnSnap Count (員数担当者用)</a></li>
+      <li><a href="./lift/">ReturnSnap Lift (リフトマン用)</a></li>
+    </ul>
+  </div>
+
+  <script type="module">
+    import { GasBridgeClient } from './src/shared/api/gas-bridge.ts';
+    import { StorageCapabilityChecker } from './src/shared/storage/capability-check.ts';
+    import { ReturnSnapUploader } from './src/shared/upload/uploader.ts';
+    import { ReturnSnapDatabase } from './src/shared/db/database.ts';
+
+    const gasUrlInput = document.getElementById('gasUrl');
+    const btnConnect = document.getElementById('btnConnect');
+    const btnPing = document.getElementById('btnPing');
+    const logArea = document.getElementById('log');
+
+    // ログ書き込み関数
+    function addLog(message) {
+      const time = new Date().toLocaleTimeString();
+      logArea.textContent = `[${time}] ${message}\n` + logArea.textContent;
+    }
+
+    // コンソールエラーとグローバルエラーを画面に表示するためのデバッグ処理
+    (function interceptErrors() {
+      const origError = console.error;
+      const origWarn = console.warn;
+      
+      console.error = function(...args) {
+        addLog(`[CONSOLE ERROR] ${args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')}`);
+        origError.apply(console, args);
+      };
+      
+      console.warn = function(...args) {
+        addLog(`[CONSOLE WARN] ${args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')}`);
+        origWarn.apply(console, args);
+      };
+
+      window.onerror = function(message, source, lineno, colno, error) {
+        addLog(`[GLOBAL ERROR] ${message} at ${source}:${lineno}:${colno}`);
+        return false;
+      };
+
+      window.addEventListener('unhandledrejection', function(event) {
+        addLog(`[UNHANDLED REJECTION] ${event.reason}`);
+      });
+    })();
+
+    // 保存したURLがあれば復元
+    const savedUrl = localStorage.getItem('returnsnap_gas_url') || '';
+    gasUrlInput.value = savedUrl;
+
+    let client = null;
+
+    btnConnect.addEventListener('click', async () => {
+      const url = gasUrlInput.value.trim();
+      if (!url) {
+        alert('GAS WebApp URLを入力してください');
+        return;
+      }
+      
+      localStorage.setItem('returnsnap_gas_url', url);
+      addLog(`ブリッジ接続開始: ${url}`);
+      
+      try {
+        client = new GasBridgeClient(url);
+        await client.init();
+        addLog('ブリッジiframeの読み込み完了。送信準備完了。');
+        btnPing.disabled = false;
+      } catch (err) {
+        addLog(`ブリッジ初期化エラー: ${err.message}`);
+        console.error(err);
+      }
+    });
+
+    btnPing.addEventListener('click', async () => {
+      if (!client) return;
+      
+      addLog('PING送信中...');
+      try {
+        const response = await client.send('healthCheck', { message: 'PING' });
+        addLog(`PONG受信成功！ レスポンス: ${JSON.stringify(response.payload)}`);
+      } catch (err) {
+        addLog(`PINGエラー: ${err.message}`);
+        console.error(err);
+      }
+    });
+
+    const btnCheckStorage = document.getElementById('btnCheckStorage');
+    btnCheckStorage.addEventListener('click', async () => {
+      addLog('ストレージ診断を開始します...');
+      try {
+        const checker = new StorageCapabilityChecker();
+        const result = await checker.check();
+        
+        addLog(`【診断結果】
+- 総合評価: ${result.supported ? '✅ 合格' : '❌ 不合格'}
+- IndexedDBサポート: ${result.indexedDbOk ? 'OK' : 'NG'}
+- Service Workerサポート: ${result.serviceWorkerOk ? 'OK' : 'NG'}
+- 読み書き削除テスト: ${result.writeReadDeleteOk ? 'OK' : 'NG'}
+- 推定利用可能容量: ${result.availableBytes ? (result.availableBytes / (1024 * 1024)).toFixed(1) + ' MB' : '取得不可'}
+- クォータ警告状態: ${result.isQuotaLow ? '⚠️ 容量不足' : 'OK'}
+- 診断メッセージ: ${result.blockReason || '問題ありません'}`);
+      } catch (err) {
+        addLog(`[DIAGNOSTIC ERROR] ${err.message}`);
+        console.error(err);
+      }
+    });
+
+    const btnSync = document.getElementById('btnSync');
+    const syncBadge = document.getElementById('syncBadge');
+    const networkStatus = document.getElementById('networkStatus');
+    const networkText = document.getElementById('networkText');
+    const db = new ReturnSnapDatabase();
+
+    // ネットワーク状態の監視
+    function updateNetworkStatus() {
+      if (navigator.onLine) {
+        networkStatus.className = 'status online';
+        networkText.textContent = 'オンライン (送信可能)';
+        btnSync.disabled = false;
+      } else {
+        networkStatus.className = 'status offline';
+        networkText.textContent = 'オフライン (送信不可)';
+        btnSync.disabled = true;
+      }
+    }
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    updateNetworkStatus();
+
+    // 未送信バッジの更新
+    async function updateSyncBadge() {
+      try {
+        await db.open();
+        const drafts = await db.getAll('drafts');
+        const unsent = drafts.filter(d => d.status === 'READY' || d.status === 'PARTIAL');
+        if (unsent.length > 0) {
+          syncBadge.style.display = 'inline-block';
+          syncBadge.textContent = `${unsent.length} 件の未送信データ`;
+          if (navigator.onLine) {
+            btnSync.disabled = false;
+          }
+        } else {
+          syncBadge.style.display = 'none';
+          btnSync.disabled = true;
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        db.close();
+      }
+    }
+
+    // 定期監視とロード時にバッジを更新します
+    updateSyncBadge();
+    window.setInterval(updateSyncBadge, 5000); // 5秒ごとに自動更新
+
+    // 同期処理の実行
+    btnSync.addEventListener('click', async () => {
+      const url = gasUrlInput.value.trim();
+      if (!url) {
+        alert('GAS WebApp URLを設定し、初期化を行ってから実行してください。');
+        return;
+      }
+
+      btnSync.disabled = true;
+      addLog('同期アップロード処理を開始します...');
+
+      try {
+        const uploader = new ReturnSnapUploader(url);
+        uploader.onProgress((progress) => {
+          addLog(`[進捗] ${progress.message}`);
+          if (progress.status === 'SUCCESS' || progress.status === 'ERROR') {
+            btnSync.disabled = false;
+            updateSyncBadge();
+          }
+        });
+        await uploader.sync();
+      } catch (err) {
+        addLog(`[SYNC ERROR] ${err.message}`);
+        btnSync.disabled = false;
+        updateSyncBadge();
+      }
+    });
+  </script>
+</body>
+</html>

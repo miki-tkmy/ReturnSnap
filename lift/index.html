@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ReturnSnap Lift</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root {
+      --primary-color: #1a237e; /* 深い紺色 */
+      --primary-light: #534bae;
+      --accent-color: #ffd600; /* 黄色 */
+      --background-color: #f5f5f6;
+      --card-background: #ffffff;
+      --text-color: #212121;
+      --error-color: #d32f2f;
+      --success-color: #388e3c;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .badge {
+      background-color: var(--accent-color);
+      color: #000;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 16px auto;
+      padding: 0 16px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: var(--card-background);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 8px;
+    }
+
+    p {
+      line-height: 1.5;
+      color: #666;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: background-color 0.2s;
+      margin-bottom: 12px;
+      text-align: center;
+      display: block;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:active {
+      background-color: var(--primary-light);
+    }
+
+    .btn-accent {
+      background-color: var(--accent-color);
+      color: black;
+    }
+
+    .btn-danger {
+      background-color: var(--error-color);
+      color: white;
+    }
+
+    .btn:disabled {
+      background-color: #ccc;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    /* カテゴリ選択タブ風ラジオボタン */
+    .category-selector {
+      display: flex;
+      background: #eee;
+      padding: 4px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .category-selector label {
+      flex: 1;
+      text-align: center;
+      margin: 0;
+      padding: 10px 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .category-selector input[type="radio"] {
+      display: none;
+    }
+
+    .category-selector input[type="radio"]:checked + label {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    /* カメラ表示 */
+    .camera-wrapper {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      margin-bottom: 16px;
+    }
+
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .camera-overlay {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    /* グレード評価ラジオボタン（大きくてタップしやすいボタン風デザイン） */
+    .grade-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .grade-selector label {
+      flex: 1;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 16px 0;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      background: white;
+      transition: all 0.2s;
+    }
+
+    .grade-selector input[type="radio"] {
+      display: none;
+    }
+
+    .grade-selector input[type="radio"]:checked + label {
+      border-color: var(--primary-color);
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    /* A〜Dの色指定用カスタム枠線 */
+    .grade-selector input[type="radio"]:checked + label[for="gradeA"] { border-color: var(--success-color); background: var(--success-color); }
+    .grade-selector input[type="radio"]:checked + label[for="gradeB"] { border-color: #7cb342; background: #7cb342; }
+    .grade-selector input[type="radio"]:checked + label[for="gradeC"] { border-color: #fb8c00; background: #fb8c00; }
+    .grade-selector input[type="radio"]:checked + label[for="gradeD"] { border-color: var(--error-color); background: var(--error-color); }
+
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .portal-link {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .portal-link a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>ReturnSnap Lift (リフト用)</h1>
+    <div>
+      <span id="baseInfo" style="font-size: 13px; margin-right: 8px; font-weight: bold;"></span>
+      <span id="unsentCountBadge" class="badge" style="display: none;"></span>
+    </div>
+  </header>
+
+  <!-- 警告エラーエリア -->
+  <div id="diagnosticMsg" style="display: none;"></div>
+
+  <!-- アプリ本体 -->
+  <div id="appContainer" class="container" style="display: none;">
+
+    <!-- ステップ 1: 伝票登録 -->
+    <div id="stepInput" class="card">
+      <h2>1. 伝票番号の登録</h2>
+      <p>伝票のQRコードをスキャンするか、番号を手入力してください。</p>
+
+      <div class="form-group" style="text-align: center;">
+        <button id="btnStartQr" class="btn btn-primary">📷 伝票QRを読み取る</button>
+        <button id="btnStopQr" class="btn btn-danger" style="display: none;">✕ QR読み取りを停止</button>
+      </div>
+
+      <div style="text-align: center; margin: 15px 0; color: #999; font-weight: bold;">- または -</div>
+
+      <div class="form-group">
+        <label for="slipInput">伝票番号 (数字6桁):</label>
+        <input type="text" id="slipInput" inputmode="numeric" pattern="[0-9]*" placeholder="例: 024141" maxlength="6">
+      </div>
+      <button id="btnManualSubmit" class="btn btn-accent">伝票番号を確定する</button>
+    </div>
+
+    <!-- ステップ 2: カテゴリ選択＆撮影 -->
+    <div id="stepShooting" class="card" style="display: none;">
+      <h2>2. 写真撮影</h2>
+      <p>撮影するカテゴリを選択し、撮影してください。</p>
+
+      <!-- カテゴリ選択タブ -->
+      <div class="category-selector">
+        <input type="radio" id="catReturn" name="photoCategory" value="RETURN_MATERIAL" checked>
+        <label for="catReturn">① 返納材</label>
+
+        <input type="radio" id="catWhole" name="photoCategory" value="LOAD_WHOLE">
+        <label for="catWhole">② 積込全体</label>
+
+        <input type="radio" id="catDetail" name="photoCategory" value="LOAD_DETAIL">
+        <label for="catDetail">③ 積込詳細</label>
+      </div>
+
+      <div class="camera-wrapper">
+        <video id="video" autoplay playsinline muted></video>
+        <div id="imageCountBadge" class="camera-overlay">返納材: 0/10枚 (全0枚)</div>
+      </div>
+
+      <button id="btnShutter" class="btn btn-primary">📷 撮影する</button>
+      <button id="btnGoToPreview" class="btn btn-accent" disabled>判定・プレビュー確認へ進む</button>
+    </div>
+
+    <!-- ステップ 3: グレード判定＆プレビュー＆保存 -->
+    <div id="stepPreview" class="card" style="display: none;">
+      <h2>3. 状況判定と最終確認</h2>
+      <p style="color: var(--error-color); font-weight: bold;">*返納材の評価グレードを選択してください (必須):</p>
+
+      <!-- 4択グレード選択ボタン -->
+      <div class="grade-selector">
+        <input type="radio" id="gradeA" name="gradeSelection" value="A">
+        <label for="gradeA" id="lblGradeA">A<br><span style="font-size: 11px; font-weight: normal;">良</span></label>
+
+        <input type="radio" id="gradeB" name="gradeSelection" value="B">
+        <label for="gradeB" id="lblGradeB">B<br><span style="font-size: 11px; font-weight: normal;">要整備</span></label>
+
+        <input type="radio" id="gradeC" name="gradeSelection" value="C">
+        <label for="gradeC" id="lblGradeC">C<br><span style="font-size: 11px; font-weight: normal;">要修理</span></label>
+
+        <input type="radio" id="gradeD" name="gradeSelection" value="D">
+        <label for="gradeD" id="lblGradeD">D<br><span style="font-size: 11px; font-weight: normal;">要廃棄</span></label>
+      </div>
+
+      <h2>撮影写真の確認</h2>
+      <div id="previewContainer" class="gallery"></div>
+
+      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+      <button id="btnSaveDraft" class="btn btn-accent" disabled>保存する</button>
+      <button id="btnCancelDraft" class="btn btn-danger">すべての写真を破棄して戻る</button>
+    </div>
+
+    <div class="portal-link">
+      <a href="../">ポータル画面に戻る</a>
+    </div>
+
+  </div>
+
+  <script type="module" src="../src/lift/main.ts"></script>
+</body>
+</html>

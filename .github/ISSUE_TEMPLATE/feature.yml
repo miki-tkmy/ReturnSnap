@@ -1,0 +1,11 @@
+name: 🎉 機能追加 (Feature Request)
+description: 新しい機能の追加を提案・追跡します
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: overview
+    attributes:
+      label: 1. 概要
+      description: 追加したい機能の概要を説明してください
+    validations:
+      required: true
