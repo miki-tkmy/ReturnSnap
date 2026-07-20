@@ -184,89 +184,107 @@
       gap: 12px;
       margin-top: 16px;
     }
-
-    .portal-link {
-      text-align: center;
-      margin-top: 24px;
-    }
-
-    .portal-link a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: bold;
-    }
   </style>
-  <script type="module" crossorigin src="/ReturnSnap/assets/count-DxwXTtIU.js"></script>
-  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/capability-check-DaB2OGDN.js">
+  <script type="module" crossorigin src="/ReturnSnap/assets/count-AuQHpGkZ.js"></script>
+  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/uploader-oBDaWbKr.js">
   <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/qr-scanner-Cb2EGOTg.js">
 <script id="vite-plugin-pwa:register-sw" src="/ReturnSnap/registerSW.js"></script></head>
 <body>
 
   <header>
-    <h1>ReturnSnap Count (員数用)</h1>
+    <h1>ReturnSnap Count</h1>
     <div>
-      <span id="baseInfo" style="font-size: 13px; margin-right: 8px; font-weight: bold;"></span>
+      <span id="baseInfo" style="font-size: 13px; margin-right: 8px; font-weight: bold;">[未設定]</span>
       <span id="unsentCountBadge" class="badge" style="display: none;"></span>
     </div>
   </header>
 
-  <!-- 起動前診断ブロック用エラーエリア -->
+  <!-- 起動前診断ブロック用エリア -->
   <div id="diagnosticMsg" style="display: none;"></div>
 
-  <!-- アプリケーション本体 -->
-  <div id="appContainer" class="container" style="display: none;">
-
-    <!-- ステップ 1: 伝票入力/QR読み取り -->
-    <div id="stepInput" class="card">
-      <h2>1. 伝票番号の登録</h2>
-      <p>伝票のQRコードを読み取るか、番号を手入力してください。</p>
-
-      <div class="form-group" style="text-align: center;">
-        <button id="btnStartQr" class="btn btn-primary">📷 伝票QRを読み取る</button>
-        <button id="btnStopQr" class="btn btn-danger" style="display: none;">✕ QR読み取りを停止</button>
-      </div>
-
-      <div style="text-align: center; margin: 15px 0; color: #999; font-weight: bold;">- または -</div>
-
+  <div class="container">
+    
+    <!-- 初期設定画面 (アクティベーション/管理者向け) -->
+    <div id="stepSetup" class="card" style="display: none;">
+      <h2>端末初期設定 (管理者用)</h2>
+      <p>この端末を貸与する前に、管理者がデバイスIDと通信URLを設定し有効化してください。</p>
+      
       <div class="form-group">
-        <label for="slipInput">伝票番号 (数字6桁):</label>
-        <input type="text" id="slipInput" inputmode="numeric" pattern="[0-9]*" placeholder="例: 024141" maxlength="6">
+        <label for="setupGasUrl">GAS WebApp URL:</label>
+        <input type="text" id="setupGasUrl" placeholder="https://script.google.com/macros/s/.../exec" style="letter-spacing: 0; font-size: 16px;">
       </div>
-      <button id="btnManualSubmit" class="btn btn-accent">伝票番号を確定する</button>
+      
+      <div class="form-group">
+        <label for="setupDeviceId">デバイスID (例: dev-001):</label>
+        <input type="text" id="setupDeviceId" placeholder="dev-xxx" style="letter-spacing: 0; font-size: 16px; text-align: center;">
+      </div>
+      
+      <button id="btnSaveSetup" class="btn btn-accent">設定を登録・有効化する</button>
     </div>
 
-    <!-- ステップ 2: カメラ連続撮影 -->
-    <div id="stepShooting" class="card" style="display: none;">
-      <h2>2. 写真撮影</h2>
-      <p>返納品の全体写真を撮影してください。(最大30枚)</p>
+    <!-- アプリケーション本体 -->
+    <div id="appContainer" style="display: none;">
 
-      <div class="camera-wrapper">
-        <video id="video" autoplay playsinline muted></video>
-        <div id="imageCountBadge" class="camera-overlay">0 枚</div>
+      <!-- ステップ 1: 伝票入力/QR読み取り -->
+      <div id="stepInput" class="card">
+        <h2>1. 伝票番号の登録</h2>
+        <p>伝票のQRコードを読み取るか、番号を手入力してください。</p>
+
+        <div class="form-group" style="text-align: center;">
+          <button id="btnStartQr" class="btn btn-primary">📷 伝票QRを読み取る</button>
+          <button id="btnStopQr" class="btn btn-danger" style="display: none;">✕ QR読み取りを停止</button>
+        </div>
+
+        <div style="text-align: center; margin: 15px 0; color: #999; font-weight: bold;">- または -</div>
+
+        <div class="form-group">
+          <label for="slipInput">伝票番号 (数字6桁):</label>
+          <input type="text" id="slipInput" inputmode="numeric" pattern="[0-9]*" placeholder="例: 024141" maxlength="6">
+        </div>
+        <button id="btnManualSubmit" class="btn btn-accent">伝票番号を確定する</button>
       </div>
 
-      <button id="btnShutter" class="btn btn-primary">📷 撮影する</button>
-      <button id="btnGoToPreview" class="btn btn-accent" disabled>プレビュー確認へ進む</button>
+      <!-- ステップ 2: カメラ連続撮影 -->
+      <div id="stepShooting" class="card" style="display: none;">
+        <h2>2. 写真撮影</h2>
+        <p>返納品の全体写真を撮影してください。(最大30枚)</p>
+
+        <div class="camera-wrapper">
+          <video id="video" autoplay playsinline muted></video>
+          <div id="imageCountBadge" class="camera-overlay">0 枚</div>
+        </div>
+
+        <button id="btnShutter" class="btn btn-primary">📷 撮影する</button>
+        <button id="btnGoToPreview" class="btn btn-accent" disabled>プレビュー確認へ進む</button>
+      </div>
+
+      <!-- ステップ 3: プレビュー・削除・再撮影・保存 -->
+      <div id="stepPreview" class="card" style="display: none;">
+        <h2>3. 撮影写真の確認</h2>
+        <p>撮影された写真を確認し、問題なければ保存してください。</p>
+
+        <div id="previewContainer" class="gallery"></div>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <button id="btnSaveDraft" class="btn btn-accent" disabled>保存する</button>
+        <button id="btnCancelDraft" class="btn btn-danger">すべての写真を破棄して戻る</button>
+      </div>
+
+      <!-- 同期アップロード機能 (アプリ内完結用) -->
+      <div id="syncCard" class="card" style="border: 2px solid var(--primary-color);">
+        <h2 style="font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 6px; color: var(--primary-color);">📡 写真データの送信 (アップロード)</h2>
+        <p style="font-size: 13px; margin: 4px 0;">通信状態: <span id="networkText" style="font-weight: bold;">判定中...</span></p>
+        
+        <div style="margin: 12px 0; display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+          <span id="unsentBadge" class="badge" style="background-color: #fb8c00; color: white; font-size: 13px; padding: 6px 12px;">0件の未送信データ</span>
+          <button id="btnSyncUpload" class="btn btn-primary" style="margin: 0; padding: 10px 20px; font-size: 14px; width: auto; font-weight: bold;">送信開始</button>
+        </div>
+        
+        <div id="syncLog" style="background: #f5f5f6; border: 1px solid #ccc; border-radius: 4px; padding: 8px; font-size: 11px; max-height: 90px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; margin-top: 8px; color: #555;">同期ログがここに表示されます...</div>
+      </div>
+
     </div>
-
-    <!-- ステップ 3: プレビュー・削除・再撮影・保存 -->
-    <div id="stepPreview" class="card" style="display: none;">
-      <h2>3. 撮影写真の確認</h2>
-      <p>撮影された写真を確認し、問題なければ保存してください。</p>
-
-      <!-- プレビュー画像配置エリア -->
-      <div id="previewContainer" class="gallery"></div>
-
-      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-
-      <button id="btnSaveDraft" class="btn btn-accent" disabled>保存する</button>
-      <button id="btnCancelDraft" class="btn btn-danger">すべての写真を破棄して戻る</button>
-    </div>
-
-    <div class="portal-link">
-      <a href="../">ポータル画面に戻る</a>
-    </div>
-
   </div>
 
 </body>
