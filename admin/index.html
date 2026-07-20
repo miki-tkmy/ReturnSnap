@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RS Admin</title>
+  <link rel="manifest" href="/ReturnSnap/assets/manifest-smfJbJVk.webmanifest">
+  <style>
+    :root {
+      --primary-color: #37474f; /* グレー/紺系 */
+      --primary-light: #62727b;
+      --accent-color: #00bcd4;
+      --background-color: #eceff1;
+      --card-background: #ffffff;
+      --text-color: #263238;
+      --error-color: #c62828;
+      --success-color: #2e7d32;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 0 16px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: var(--card-background);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    /* ログイン画面 */
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 24px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* 統計パネル */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    .stat-val {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 8px 0;
+      color: var(--primary-color);
+    }
+
+    /* メニューボタン */
+    .menu-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 6px;
+      background: #cfd8dc;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    /* テーブル・フォーム */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #cfd8dc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f5f7f8;
+      font-weight: bold;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .btn-primary { background: var(--primary-color); color: white; }
+    .btn-accent { background: var(--accent-color); color: white; }
+    .btn-danger { background: var(--error-color); color: white; }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #b0bec5;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+  </style>
+  <script type="module" crossorigin src="/ReturnSnap/assets/admin-exRWNko_.js"></script>
+  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/gas-bridge-YKNSj5_a.js">
+<script id="vite-plugin-pwa:register-sw" src="/ReturnSnap/registerSW.js"></script></head>
+<body>
+
+  <!-- ログイン画面 -->
+  <div id="loginScreen" class="login-container">
+    <h2 style="text-align: center; margin-top: 0; color: var(--primary-color);">RS Admin ログイン</h2>
+    
+    <!-- 秘密キー接続先 (貸与前の初期設定用ブリッジURL) -->
+    <div class="form-group">
+      <label for="adminBridgeUrl">GAS WebApp URL:</label>
+      <input type="text" id="adminBridgeUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+
+    <div class="form-group">
+      <label for="adminPassword">管理者パスワード:</label>
+      <input type="password" id="adminPassword" placeholder="パスワードを入力">
+    </div>
+    
+    <button id="btnLogin" class="btn btn-primary" style="width: 100%; padding: 14px;">ログイン</button>
+  </div>
+
+  <!-- 管理者メイン画面 -->
+  <div id="mainScreen" style="display: none;">
+    <header>
+      <h1>RS Admin 管理ポータル</h1>
+      <button id="btnLogout" class="btn btn-danger" style="padding: 6px 12px; font-size: 13px;">ログアウト</button>
+    </header>
+
+    <div class="container">
+      
+      <!-- タブメニュー -->
+      <div class="menu-tabs">
+        <button class="tab-btn active" data-target="panelDashboard">ダッシュボード</button>
+        <button class="tab-btn" data-target="panelUsers">ユーザー管理</button>
+        <button class="tab-btn" data-target="panelDevices">端末管理</button>
+        <button class="tab-btn" data-target="panelBases">Base管理</button>
+        <button class="tab-btn" data-target="panelHistory">送信履歴</button>
+        <button class="tab-btn" data-target="panelErrors">エラーログ</button>
+      </div>
+
+      <!-- ① ダッシュボード -->
+      <div id="panelDashboard" class="card tab-panel">
+        <h2>ダッシュボード</h2>
+        <div class="dashboard-grid">
+          <div class="stat-card">
+            <div>登録ユーザー数</div>
+            <div id="statUsers" class="stat-val">0</div>
+          </div>
+          <div class="stat-card">
+            <div>有効端末数</div>
+            <div id="statDevices" class="stat-val">0</div>
+          </div>
+          <div class="stat-card">
+            <div>本日アップロード数</div>
+            <div id="statUploads" class="stat-val">0</div>
+          </div>
+          <div class="stat-card">
+            <div>未解決エラー数</div>
+            <div id="statErrors" class="stat-val" style="color: var(--error-color);">0</div>
+          </div>
+        </div>
+
+        <h3>最終通信が古い端末 (3日以上通信なし)</h3>
+        <table id="tblOldDevices">
+          <thead>
+            <tr>
+              <th>端末ID</th>
+              <th>端末名</th>
+              <th>最終通信日時</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="3" style="text-align: center;">読み込み中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ② ユーザー管理 -->
+      <div id="panelUsers" class="card tab-panel" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h2>ユーザー管理</h2>
+          <button id="btnNewUser" class="btn btn-accent">+ 新規ユーザー追加</button>
+        </div>
+        <table id="tblUsers">
+          <thead>
+            <tr>
+              <th>ユーザーID</th>
+              <th>ユーザー名</th>
+              <th>Baseコード</th>
+              <th>アプリ区分</th>
+              <th>状態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align: center;">読み込み中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ③ 端末管理 -->
+      <div id="panelDevices" class="card tab-panel" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h2>端末管理</h2>
+          <button id="btnNewDevice" class="btn btn-accent">+ 新規端末登録</button>
+        </div>
+        <table id="tblDevices">
+          <thead>
+            <tr>
+              <th>Device ID</th>
+              <th>端末名</th>
+              <th>紐付けユーザー</th>
+              <th>利用権限</th>
+              <th>状態</th>
+              <th>最終通信</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="7" style="text-align: center;">読み込み中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ④ Base管理 -->
+      <div id="panelBases" class="card tab-panel" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h2>Base管理</h2>
+          <button id="btnNewBase" class="btn btn-accent">+ 新規Base追加</button>
+        </div>
+        <table id="tblBases">
+          <thead>
+            <tr>
+              <th>Baseコード</th>
+              <th>Base名</th>
+              <th>エリア名</th>
+              <th>表示順</th>
+              <th>状態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align: center;">読み込み中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ⑤ 送信履歴 -->
+      <div id="panelHistory" class="card tab-panel" style="display: none;">
+        <h2>送信履歴検索</h2>
+        <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="form-group">
+            <label for="filterSlip">伝票番号:</label>
+            <input type="text" id="filterSlip" placeholder="伝票番号で検索">
+          </div>
+          <div class="form-group">
+            <label for="filterBase">Baseコード:</label>
+            <input type="text" id="filterBase" placeholder="Baseコード">
+          </div>
+          <div class="form-group" style="display: flex; align-items: flex-end;">
+            <button id="btnSearchHistory" class="btn btn-primary" style="width: 100%; height: 42px;">検索</button>
+          </div>
+        </div>
+        <table id="tblHistory">
+          <thead>
+            <tr>
+              <th>送信日時</th>
+              <th>伝票番号</th>
+              <th>Baseコード</th>
+              <th>評価グレード</th>
+              <th>アプリ種別</th>
+              <th>Driveリンク</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align: center;">検索ボタンを押してください。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ⑥ エラーログ -->
+      <div id="panelErrors" class="card tab-panel" style="display: none;">
+        <h2>エラーログ一覧</h2>
+        <table id="tblErrors">
+          <thead>
+            <tr>
+              <th>発生日時</th>
+              <th>Device ID</th>
+              <th>伝票番号</th>
+              <th>エラー内容</th>
+              <th>解決</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" style="text-align: center;">読み込み中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ユーザー編集用モーダル -->
+  <div id="modalUser" class="modal">
+    <div class="modal-content">
+      <h3 id="modalUserTitle">ユーザー設定</h3>
+      <input type="hidden" id="formUserId">
+      
+      <div class="form-group">
+        <label for="formUserName">ユーザー名 (旧協力会社名):</label>
+        <input type="text" id="formUserName" placeholder="例: 協力会社A_A">
+      </div>
+      
+      <div class="form-group">
+        <label for="formUserBase">所属Baseコード:</label>
+        <input type="text" id="formUserBase" placeholder="例: LW">
+      </div>
+
+      <div class="form-group">
+        <label for="formUserApp">アプリ区分:</label>
+        <select id="formUserApp">
+          <option value="Count/Lift">Count/Lift両方</option>
+          <option value="Count">Countのみ</option>
+          <option value="Lift">Liftのみ</option>
+          <option value="Admin">管理者のみ</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="formUserActive" style="width: auto;">
+        <label for="formUserActive" style="margin: 0;">このユーザーを有効にする</label>
+      </div>
+
+      <div class="form-group">
+        <label for="formUserNotes">備考:</label>
+        <textarea id="formUserNotes" placeholder="連絡事項など" rows="3"></textarea>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="btnCancelUser" class="btn" style="background:#bbb;">キャンセル</button>
+        <button id="btnSaveUser" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 端末編集用モーダル -->
+  <div id="modalDevice" class="modal">
+    <div class="modal-content">
+      <h3 id="modalDeviceTitle">端末設定</h3>
+      
+      <!-- Device ID (新規登録時は自動採番をプレビュー) -->
+      <div class="form-group">
+        <label for="formDeviceId">Device ID:</label>
+        <input type="text" id="formDeviceId" placeholder="自動採番されます" disabled>
+        <small id="deviceIdHint" style="color: #666;"></small>
+      </div>
+
+      <div class="form-group">
+        <label for="formDeviceName">端末名:</label>
+        <input type="text" id="formDeviceName" placeholder="例: 西日本スマホ01">
+      </div>
+
+      <div class="form-group">
+        <label for="formDeviceUser">紐付けユーザーID:</label>
+        <input type="text" id="formDeviceUser" placeholder="例: user-002">
+      </div>
+
+      <div class="form-group">
+        <label for="formDeviceApp">アプリ利用権限:</label>
+        <select id="formDeviceApp">
+          <option value="Count/Lift">Count/Lift両方</option>
+          <option value="Count">Countのみ</option>
+          <option value="Lift">Liftのみ</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="formDeviceActive" style="width: auto;">
+        <label for="formDeviceActive" style="margin: 0;">この端末を有効にする (紛失時はチェックを外す)</label>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="btnCancelDevice" class="btn" style="background:#bbb;">キャンセル</button>
+        <button id="btnSaveDevice" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Base編集用モーダル -->
+  <div id="modalBase" class="modal">
+    <div class="modal-content">
+      <h3>Base設定</h3>
+      
+      <div class="form-group">
+        <label for="formBaseCode">Baseコード:</label>
+        <input type="text" id="formBaseCode" placeholder="例: LW">
+      </div>
+
+      <div class="form-group">
+        <label for="formBaseName">Base名:</label>
+        <input type="text" id="formBaseName" placeholder="例: Lab.West">
+      </div>
+
+      <div class="form-group">
+        <label for="formBaseArea">エリア名:</label>
+        <input type="text" id="formBaseArea" placeholder="例: 西日本">
+      </div>
+
+      <div class="form-group">
+        <label for="formBaseOrder">表示順 (数値):</label>
+        <input type="number" id="formBaseOrder" placeholder="10">
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="formBaseActive" style="width: auto;">
+        <label for="formBaseActive" style="margin: 0;">有効にする</label>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="btnCancelBase" class="btn" style="background:#bbb;">キャンセル</button>
+        <button id="btnSaveBase" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

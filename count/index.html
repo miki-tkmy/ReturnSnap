@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ReturnSnap Count</title>
-  <link rel="manifest" href="/ReturnSnap/assets/manifest-CjOldPqT.webmanifest">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RS Count</title>
+  <link rel="manifest" href="/ReturnSnap/assets/manifest-B6imbp2c.webmanifest">
   <style>
     :root {
       --primary-color: #1a237e; /* 深い紺色 */
@@ -12,45 +12,48 @@
       --accent-color: #ffd600; /* 黄色 */
       --background-color: #f5f5f6;
       --card-background: #ffffff;
-      --text-color: #212121;
-      --error-color: #d32f2f;
-      --success-color: #388e3c;
+      --text-color: #111111; /* コントラストを高めるためより黒く */
+      --error-color: #b71c1c; /* 高コントラストの赤 */
+      --success-color: #1b5e20; /* 高コントラストの緑 */
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 0;
       background-color: var(--background-color);
       color: var(--text-color);
       -webkit-user-select: none;
       user-select: none;
+      font-size: 20px; /* 通常文字20px以上 */
     }
 
     header {
       background-color: var(--primary-color);
       color: white;
-      padding: 12px 16px;
+      padding: 16px 20px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
       position: sticky;
       top: 0;
       z-index: 100;
+      padding-top: calc(12px + env(safe-area-inset-top));
     }
 
     header h1 {
       margin: 0;
-      font-size: 18px;
+      font-size: 26px; /* 主要見出し24px以上 */
     }
 
     .badge {
       background-color: var(--accent-color);
       color: #000;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 16px; /* 16px未満にしない */
       font-weight: bold;
     }
 
@@ -59,49 +62,53 @@
       margin: 16px auto;
       padding: 0 16px;
       box-sizing: border-box;
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     .card {
       background: var(--card-background);
       border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      margin-bottom: 16px;
+      padding: 24px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
     }
 
     h2 {
       margin-top: 0;
-      font-size: 20px;
+      font-size: 26px; /* 24px以上 */
       color: var(--primary-color);
-      border-bottom: 2px solid var(--primary-color);
-      padding-bottom: 8px;
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 10px;
     }
 
     p {
-      line-height: 1.5;
-      color: #666;
+      line-height: 1.6;
+      color: #333;
+      font-size: 20px; /* 通常文字20px以上 */
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-weight: bold;
-      font-size: 16px;
+      font-size: 22px; /* 20px以上 */
     }
 
     input[type="text"] {
       width: 100%;
-      padding: 14px;
-      font-size: 20px;
-      border: 2px solid #ccc;
+      padding: 18px;
+      font-size: 26px; /* 24px以上 */
+      border: 3px solid #111; /* 高コントラストの黒枠 */
       border-radius: 8px;
       box-sizing: border-box;
       text-align: center;
       letter-spacing: 2px;
+      background-color: #fff;
+      color: #000;
     }
 
     input[type="text"]:focus {
@@ -111,17 +118,20 @@
 
     .btn {
       width: 100%;
-      padding: 16px;
-      font-size: 18px;
+      height: 64px; /* ボタン高さ60px以上 */
+      font-size: 24px; /* 主要ボタン22〜24px */
       font-weight: bold;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       box-sizing: border-box;
       transition: background-color 0.2s;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       text-align: center;
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60px; /* タップ領域確保 */
     }
 
     .btn-primary {
@@ -136,6 +146,7 @@
     .btn-accent {
       background-color: var(--accent-color);
       color: black;
+      border: 2px solid #000;
     }
 
     .btn-danger {
@@ -145,62 +156,245 @@
 
     .btn:disabled {
       background-color: #ccc;
-      color: #888;
+      color: #666;
       cursor: not-allowed;
+      border-color: #ccc;
     }
 
-    /* カメラ表示 */
-    .camera-wrapper {
-      position: relative;
-      width: 100%;
+    /* 全画面カメラ表示スタイル */
+    #stepShooting {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
       background: #000;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 0;
+      margin: 0;
+    }
+
+    .camera-fullscreen-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    /* カメラ映像上のオーバーレイコントロール */
+    .camera-header-overlay {
+      position: absolute;
+      top: calc(16px + env(safe-area-inset-top));
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .camera-header-overlay button, .camera-header-overlay span {
+      pointer-events: auto;
+    }
+
+    .camera-badge {
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .btn-camera-close {
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      border: 2px solid white;
+      border-radius: 50%;
+      width: 54px;
+      height: 54px;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .camera-footer-overlay {
+      position: absolute;
+      bottom: calc(24px + env(safe-area-inset-bottom));
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      z-index: 10;
+      padding: 0 20px;
+    }
+
+    .shutter-btn-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .btn-shutter-large {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: white;
+      border: 8px solid var(--primary-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-shutter-large:active {
+      background: #ccc;
+    }
+
+    .btn-shutter-inner {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: var(--error-color);
+    }
+
+    /* プレビューサムネイル2列表示 */
+    .gallery-2col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* 縦画面原則2列 */
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .preview-item {
+      position: relative;
+      aspect-ratio: 4/3;
       border-radius: 8px;
       overflow: hidden;
-      aspect-ratio: 4/3;
-      margin-bottom: 16px;
+      border: 3px solid #222;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
 
-    #video {
+    .preview-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .camera-overlay {
+    .preview-seq-badge {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(0,0,0,0.6);
+      top: 8px;
+      left: 8px;
+      background: var(--primary-color);
       color: white;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: bold;
     }
 
-    .gallery {
+    /* 全画面プレビュー (ライトボックス) モーダル */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      background: rgba(0,0,0,0.95);
+      z-index: 10000;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      box-sizing: border-box;
+    }
+
+    .lightbox-header {
+      padding: 16px;
       display: flex;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      z-index: 10;
+    }
+
+    .lightbox-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 12px;
-      margin-top: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lightbox-image {
+      max-width: 100%;
+      max-height: 70dvh;
+      object-fit: contain;
+      transition: transform 0.2s;
+    }
+
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: 2px solid white;
+      font-size: 28px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .lightbox-prev { left: 16px; }
+    .lightbox-next { right: 16px; }
+
+    .lightbox-footer {
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      z-index: 10;
     }
   </style>
-  <script type="module" crossorigin src="/ReturnSnap/assets/count-AuQHpGkZ.js"></script>
-  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/uploader-oBDaWbKr.js">
-  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/qr-scanner-Cb2EGOTg.js">
+  <script type="module" crossorigin src="/ReturnSnap/assets/count-BgYp7PvT.js"></script>
+  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/gas-bridge-YKNSj5_a.js">
+  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/qr-scanner-ow6hTG5F.js">
+  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/uploader-BRb1WikT.js">
 <script id="vite-plugin-pwa:register-sw" src="/ReturnSnap/registerSW.js"></script></head>
 <body>
 
   <header>
-    <h1>ReturnSnap Count</h1>
-    <div>
-      <span id="baseInfo" style="font-size: 13px; margin-right: 8px; font-weight: bold;">[未設定]</span>
+    <h1>RS Count</h1>
+    <div style="font-size: 16px; line-height: 1.4; width: 100%; display: flex; justify-content: space-between; align-items: flex-end;">
+      <!-- Base名とユーザー名を改行して表示 -->
+      <div id="userInfoDisplay" style="font-weight: bold; color: white;">
+        <div id="baseInfoText">[Base名未設定]</div>
+        <div id="userInfoText">[ユーザー名未設定]</div>
+      </div>
       <span id="unsentCountBadge" class="badge" style="display: none;"></span>
     </div>
   </header>
 
   <!-- 起動前診断ブロック用エリア -->
-  <div id="diagnosticMsg" style="display: none;"></div>
+  <div id="diagnosticMsg" style="display: none; font-size: 16px;"></div>
 
   <div class="container">
     
@@ -211,12 +405,12 @@
       
       <div class="form-group">
         <label for="setupGasUrl">GAS WebApp URL:</label>
-        <input type="text" id="setupGasUrl" placeholder="https://script.google.com/macros/s/.../exec" style="letter-spacing: 0; font-size: 16px;">
+        <input type="text" id="setupGasUrl" placeholder="https://script.google.com/macros/s/.../exec" style="letter-spacing: 0; font-size: 18px;">
       </div>
       
       <div class="form-group">
         <label for="setupDeviceId">デバイスID (例: dev-001):</label>
-        <input type="text" id="setupDeviceId" placeholder="dev-xxx" style="letter-spacing: 0; font-size: 16px; text-align: center;">
+        <input type="text" id="setupDeviceId" placeholder="dev-xxx" style="letter-spacing: 0; font-size: 18px; text-align: center;">
       </div>
       
       <button id="btnSaveSetup" class="btn btn-accent">設定を登録・有効化する</button>
@@ -231,59 +425,101 @@
         <p>伝票のQRコードを読み取るか、番号を手入力してください。</p>
 
         <div class="form-group" style="text-align: center;">
-          <button id="btnStartQr" class="btn btn-primary">📷 伝票QRを読み取る</button>
-          <button id="btnStopQr" class="btn btn-danger" style="display: none;">✕ QR読み取りを停止</button>
+          <button id="btnStartQr" class="btn btn-primary" style="height: 70px; font-size: 24px;">📷 伝票QRを読み取る</button>
+          <button id="btnStopQr" class="btn btn-danger" style="display: none; height: 70px; font-size: 24px;">✕ QR読み取りを停止</button>
         </div>
 
-        <div style="text-align: center; margin: 15px 0; color: #999; font-weight: bold;">- または -</div>
+        <div style="text-align: center; margin: 20px 0; color: #777; font-weight: bold; font-size: 20px;">- または -</div>
 
         <div class="form-group">
           <label for="slipInput">伝票番号 (数字6桁):</label>
           <input type="text" id="slipInput" inputmode="numeric" pattern="[0-9]*" placeholder="例: 024141" maxlength="6">
+          <div id="slipInputError" style="color: var(--error-color); font-weight: bold; margin-top: 8px; display: none; font-size: 18px;"></div>
         </div>
-        <button id="btnManualSubmit" class="btn btn-accent">伝票番号を確定する</button>
+        <button id="btnManualSubmit" class="btn btn-accent" style="height: 64px;">伝票番号を確定する</button>
       </div>
 
-      <!-- ステップ 2: カメラ連続撮影 -->
-      <div id="stepShooting" class="card" style="display: none;">
-        <h2>2. 写真撮影</h2>
-        <p>返納品の全体写真を撮影してください。(最大30枚)</p>
-
-        <div class="camera-wrapper">
-          <video id="video" autoplay playsinline muted></video>
-          <div id="imageCountBadge" class="camera-overlay">0 枚</div>
+      <!-- ステップ 2: カメラ全画面撮影 (JS制御により全画面表示) -->
+      <div id="stepShooting">
+        <video id="video" class="camera-fullscreen-video" autoplay playsinline muted></video>
+        
+        <div class="camera-header-overlay">
+          <button id="btnCancelCamera" class="btn-camera-close">✕</button>
+          <span id="imageCountBadge" class="camera-badge">0 / 30枚</span>
         </div>
 
-        <button id="btnShutter" class="btn btn-primary">📷 撮影する</button>
-        <button id="btnGoToPreview" class="btn btn-accent" disabled>プレビュー確認へ進む</button>
+        <div class="camera-footer-overlay">
+          <div class="shutter-btn-container">
+            <button id="btnShutter" class="btn-shutter-large">
+              <div class="btn-shutter-inner"></div>
+            </button>
+          </div>
+          <button id="btnGoToPreview" class="btn btn-accent" style="height: 60px; margin: 0; width: 80%; display: none;">プレビュー確認へ進む</button>
+        </div>
       </div>
 
-      <!-- ステップ 3: プレビュー・削除・再撮影・保存 -->
+      <!-- ステップ 3: プレビュー・保存 -->
       <div id="stepPreview" class="card" style="display: none;">
-        <h2>3. 撮影写真の確認</h2>
-        <p>撮影された写真を確認し、問題なければ保存してください。</p>
+        <h2>2. 撮影写真の確認</h2>
+        <p>サムネイルをタップすると、拡大して確認・削除できます。</p>
 
-        <div id="previewContainer" class="gallery"></div>
+        <!-- サムネイル2列表示 -->
+        <div id="previewContainer" class="gallery-2col"></div>
 
-        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <hr style="border: none; border-top: 2px solid #ddd; margin: 24px 0;">
 
-        <button id="btnSaveDraft" class="btn btn-accent" disabled>保存する</button>
-        <button id="btnCancelDraft" class="btn btn-danger">すべての写真を破棄して戻る</button>
+        <!-- 撮影を続けるボタンの追加 -->
+        <button id="btnContinueShooting" class="btn btn-primary" style="height: 64px; background-color: #5c6bc0; border: 1px solid #1a237e;">📷 さらに追加で撮影する</button>
+        
+        <button id="btnSaveDraft" class="btn btn-accent" style="height: 64px;" disabled>保存する</button>
+        <button id="btnCancelDraft" class="btn btn-danger" style="height: 64px;">すべての写真を破棄して戻る</button>
       </div>
 
       <!-- 同期アップロード機能 (アプリ内完結用) -->
-      <div id="syncCard" class="card" style="border: 2px solid var(--primary-color);">
-        <h2 style="font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 6px; color: var(--primary-color);">📡 写真データの送信 (アップロード)</h2>
-        <p style="font-size: 13px; margin: 4px 0;">通信状態: <span id="networkText" style="font-weight: bold;">判定中...</span></p>
+      <div id="syncCard" class="card" style="border: 3px solid var(--primary-color);">
+        <h2 style="font-size: 22px; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; color: var(--primary-color);">📡 写真データの送信 (アップロード)</h2>
         
-        <div style="margin: 12px 0; display: flex; gap: 8px; align-items: center; justify-content: space-between;">
-          <span id="unsentBadge" class="badge" style="background-color: #fb8c00; color: white; font-size: 13px; padding: 6px 12px;">0件の未送信データ</span>
-          <button id="btnSyncUpload" class="btn btn-primary" style="margin: 0; padding: 10px 20px; font-size: 14px; width: auto; font-weight: bold;">送信開始</button>
+        <!-- 技術ログは隠し、一般向けプログレスバー化 -->
+        <div id="uploadProgressArea" style="display: none; margin: 16px 0;">
+          <p id="uploadProgressSlip" style="font-weight: bold; margin: 4px 0; font-size: 18px;"></p>
+          <div style="width: 100%; background-color: #ddd; border-radius: 8px; height: 24px; overflow: hidden; margin: 8px 0;">
+            <div id="uploadProgressBar" style="width: 0%; background-color: var(--primary-color); height: 100%; transition: width 0.1s;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold;">
+            <span id="uploadProgressRatio">0 / 0枚</span>
+            <span id="uploadProgressPercent">0%</span>
+          </div>
+          <p id="uploadCancelNotice" style="color: var(--error-color); font-size: 16px; margin: 8px 0; font-weight: bold; text-align: center;">⚠️ アップロード中はアプリを閉じないでください</p>
         </div>
+
+        <div id="uploadStatusText" style="font-weight: bold; font-size: 18px; margin: 8px 0; text-align: center; display: none;"></div>
+        <p style="font-size: 18px; margin: 6px 0;">通信状態: <span id="networkText" style="font-weight: bold;">判定中...</span></p>
         
-        <div id="syncLog" style="background: #f5f5f6; border: 1px solid #ccc; border-radius: 4px; padding: 8px; font-size: 11px; max-height: 90px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; margin-top: 8px; color: #555;">同期ログがここに表示されます...</div>
+        <div style="margin: 16px 0; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+          <span id="unsentBadge" class="badge" style="background-color: #e65100; color: white; font-size: 18px; padding: 8px 16px; text-align: center; width: 80%;">0件の未送信データ</span>
+          <button id="btnSyncUpload" class="btn btn-primary" style="margin: 0; width: 100%; font-weight: bold; height: 60px;">送信開始</button>
+        </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- 全画面プレビュー (ライトボックス) モーダル -->
+  <div id="fullscreenLightbox" class="lightbox">
+    <div class="lightbox-header">
+      <span id="lightboxIndex" style="font-size: 22px; font-weight: bold;">1 / 1</span>
+      <button id="btnCloseLightbox" class="btn-camera-close">✕</button>
+    </div>
+    
+    <div class="lightbox-content">
+      <button id="btnLightboxPrev" class="lightbox-nav lightbox-prev">◀</button>
+      <img id="lightboxImage" class="lightbox-image" src="" alt="全画面プレビュー">
+      <button id="btnLightboxNext" class="lightbox-nav lightbox-next">▶</button>
+    </div>
+    
+    <div class="lightbox-footer">
+      <button id="btnLightboxDelete" class="btn btn-danger" style="margin: 0; flex: 1; height: 60px;">🗑️ この写真を削除</button>
+      <button id="btnLightboxBack" class="btn btn-primary" style="margin: 0; flex: 1; height: 60px; background-color: #555; border: 1px solid #333;">一覧に戻る</button>
     </div>
   </div>
 

@@ -1,5 +1,5 @@
 {
-  "name": "ReturnSnap Count",
+  "name": "RS Count",
   "short_name": "RS Count",
   "id": "/ReturnSnap/count/",
   "start_url": "/ReturnSnap/count/",
@@ -9,17 +9,17 @@
   "theme_color": "#1a237e",
   "icons": [
     {
-      "src": "../icons/common/icon-192.png",
+      "src": "../icons/count/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "../icons/common/icon-512.png",
+      "src": "../icons/count/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "../icons/common/icon-512-maskable.png",
+      "src": "../icons/count/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
