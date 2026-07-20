@@ -33,10 +33,11 @@ var d=Object.defineProperty;var c=(l,i,t)=>i in l?d(l,i,{enumerable:!0,configura
             <td>${e.grade||"-"}</td>
             <td>${e.appType}</td>
             <td><a href="${e.folderUrl}" target="_blank" rel="noopener noreferrer">📁 開く</a></td>
-          `,this.elTblHistory.appendChild(a)})}}catch(t){alert(`検索エラー: ${t.message}`)}}}async function v(){const l=document.getElementById("diagnosticMsg"),i=document.getElementById("loginScreen");try{const e=await new m().check();if(!e.supported){l&&(l.style.display="block",l.className="card",l.style.color="#c62828",l.style.border="2px solid #c62828",l.style.padding="16px",l.innerHTML=`
-          <h2 style="margin-top:0; color:#c62828;">⚠️ 起動ブロック</h2>
-          <p>${e.blockReason||"ブラウザ環境が要件を満たしていないため起動できません。"}</p>
-        `),i&&(i.style.display="none");return}await new h().init()}catch(t){console.error("Bootstrap failed:",t),l&&(l.style.display="block",l.className="card",l.style.color="#c62828",l.innerHTML=`
+          `,this.elTblHistory.appendChild(a)})}}catch(t){alert(`検索エラー: ${t.message}`)}}}async function v(){const l=document.getElementById("diagnosticMsg");try{const t=await new m().check();t.supported||l&&(l.style.display="block",l.className="card",l.style.color="#e65100",l.style.border="2px solid #ffe0b2",l.style.background="#fff3e0",l.style.padding="16px",l.innerHTML=`
+          <h2 style="margin-top:0; color:#e65100; font-size: 16px;">⚠️ 制限付き起動モード</h2>
+          <p style="font-size: 14px; margin: 0;">理由: ${t.blockReason||"必要なストレージ機能が制限されています。"}<br>
+          ※プライベートブラウズ中のため、セッション情報がブラウザに永続化されません。自動ログインは使用できません。</p>
+        `),await new h().init()}catch(i){console.error("Bootstrap failed:",i),l&&(l.style.display="block",l.className="card",l.style.color="#c62828",l.innerHTML=`
         <h2>⚠️ システムエラー</h2>
-        <p>${t.message||"アプリケーションの初期化中にエラーが発生しました。"}</p>
+        <p>${i.message||"アプリケーションの初期化中にエラーが発生しました。"}</p>
       `)}}window.addEventListener("DOMContentLoaded",v);
