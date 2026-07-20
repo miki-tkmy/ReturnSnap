@@ -69,7 +69,7 @@
       background: var(--card-background);
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8 rgba(0,0,0,0.08);
       margin-bottom: 16px;
     }
 
@@ -319,7 +319,7 @@
       background: var(--error-color);
     }
 
-    /* グレード評価（A～D簡素化・大ボタン） */
+    /* グレード評価（A〜D簡素化・大ボタン） */
     .grade-selector-large {
       display: flex;
       gap: 12px;
@@ -478,10 +478,10 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
   </style>
-  <script type="module" crossorigin src="/ReturnSnap/assets/lift-CIka1eHZ.js"></script>
-  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/gas-bridge-YKNSj5_a.js">
+  <script type="module" crossorigin src="/ReturnSnap/assets/lift-CpvEthYX.js"></script>
+  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/gas-bridge-ci6Vq4mh.js">
   <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/qr-scanner-ow6hTG5F.js">
-  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/uploader-BRb1WikT.js">
+  <link rel="modulepreload" crossorigin href="/ReturnSnap/assets/uploader-GyA9gSUQ.js">
 <script id="vite-plugin-pwa:register-sw" src="/ReturnSnap/registerSW.js"></script></head>
 <body>
 
@@ -549,11 +549,11 @@
         <p>これから撮影する対象を選択してください。</p>
         <div class="pattern-btn-container">
           <button id="btnSelectPatternReturn" class="btn-pattern">
-            <span>📦 返納材を撮影</span>
+            <span>📦 返却資材を撮影</span>
             <span style="font-size: 13px; font-weight: normal; color: #666;">(最低1枚〜最大20枚)</span>
           </button>
           <button id="btnSelectPatternLoad" class="btn-pattern">
-            <span>🚚 積込を撮影</span>
+            <span>🚚 荷姿を撮影</span>
             <span style="font-size: 13px; font-weight: normal; color: #666;">(全体: 最低1枚、詳細: 最低2枚)</span>
           </button>
         </div>
@@ -569,14 +569,14 @@
           <span id="imageCountBadge" class="camera-badge">0 / 0枚</span>
         </div>
 
-        <!-- 撮影パターン2（積込）の時だけ表示するカテゴリ選択タブ -->
+        <!-- 撮影パターン2（荷姿）の時だけ表示するカテゴリ選択タブ -->
         <div id="cameraCategoryArea" style="position: absolute; top: calc(80px + env(safe-area-inset-top)); left: 16px; right: 16px; z-index: 10; display: none;">
           <div class="category-selector">
             <input type="radio" id="catWhole" name="photoCategory" value="LOAD_WHOLE" checked>
-            <label for="catWhole">積込全体</label>
+            <label for="catWhole">荷姿全体</label>
 
             <input type="radio" id="catDetail" name="photoCategory" value="LOAD_DETAIL">
-            <label for="catDetail">積込詳細</label>
+            <label for="catDetail">荷姿詳細</label>
           </div>
         </div>
 
@@ -591,9 +591,9 @@
       <!-- ステップ 3: 状況判定＆最終確認 -->
       <div id="stepPreview" class="card" style="display: none;">
         <h2>A〜Dの返却判定</h2>
-        <p style="color: var(--error-color); font-weight: bold; margin-bottom: 12px;">*返納材の判定を選択してください (必須):</p>
+        <p style="color: var(--error-color); font-weight: bold; margin-bottom: 12px;">*返却資材の判定を選択してください (必須):</p>
 
-        <!-- A〜Dの日本語説明なしの大ボタン -->
+        <!-- A〜Dの日本語説明なしの大ボタン (括弧なし) -->
         <div class="grade-selector-large">
           <input type="radio" id="gradeA" name="gradeSelection" value="A">
           <label for="gradeA" id="lblGradeA">A</label>
@@ -608,8 +608,8 @@
           <label for="gradeD" id="lblGradeD">D</label>
         </div>
 
-        <!-- 荷姿基準表示ボタン -->
-        <button id="btnShowStandard" class="btn btn-primary" style="height: 52px; background-color: #5c6bc0; margin-bottom: 24px;">📋 荷姿判定基準を確認する</button>
+        <!-- 荷姿判定基準表示ボタン -->
+        <button id="btnShowStandard" class="btn btn-primary" style="height: 52px; background-color: #5c6bc0; margin-bottom: 24px;">📋 荷姿判定基準</button>
 
         <h2>撮影写真の確認</h2>
         <p>サムネイルをタップすると、拡大して確認・削除できます。</p>
@@ -624,7 +624,7 @@
 
       <!-- 同期アップロード機能 (アプリ内完結用) -->
       <div id="syncCard" class="card" style="border: 3px solid var(--primary-color);">
-        <h2 style="font-size: 20px; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; color: var(--primary-color);">📡 写真データの送信 (アップロード)</h2>
+        <h2 style="font-size: 20px; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; color: var(--primary-color);">📡 写真をアップロード</h2>
         
         <!-- 技術ログは隠し、一般向けプログレスバー化 -->
         <div id="uploadProgressArea" style="display: none; margin: 16px 0;">
@@ -670,7 +670,7 @@
     </div>
   </div>
 
-  <!-- 荷姿判定基準表示用モーダル -->
+  <!-- 荷姿判定基準表示用モーダル (A〜Dの後の括弧内を削除) -->
   <div id="standardModal" class="modal">
     <div class="modal-content">
       <h2 style="font-size: 20px; margin-bottom: 16px;">足場レンタル返却状況 判定基準</h2>
@@ -686,22 +686,22 @@
         </thead>
         <tbody>
           <tr>
-            <td style="border: 1px solid #ccc; padding: 8px; font-weight: bold; color: var(--success-color);">A (良)</td>
+            <td style="border: 1px solid #ccc; padding: 8px; font-weight: bold; color: var(--success-color);">A</td>
             <td style="border: 1px solid #ccc; padding: 8px;">0 束</td>
             <td style="border: 1px solid #ccc; padding: 8px;">5％ 以内</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #ccc; padding: 8px; font-weight: bold; color: #7cb342;">B (要整備)</td>
+            <td style="border: 1px solid #ccc; padding: 8px; font-weight: bold; color: #7cb342;">B</td>
             <td style="border: 1px solid #ccc; padding: 8px;">1 〜 2 束</td>
             <td style="border: 1px solid #ccc; padding: 8px;">20％ 以内</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #ccc; padding: 8px; font-weight: bold; color: #fb8c00;">C (要修理)</td>
+            <td style="border: 1px solid #ccc; padding: 8px; font-weight: bold; color: #fb8c00;">C</td>
             <td style="border: 1px solid #ccc; padding: 8px;">3 〜 6 束</td>
             <td style="border: 1px solid #ccc; padding: 8px;">21 〜 49％</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #ccc; padding: 8px; font-weight: bold; color: var(--error-color);">D (要廃棄)</td>
+            <td style="border: 1px solid #ccc; padding: 8px; font-weight: bold; color: var(--error-color);">D</td>
             <td style="border: 1px solid #ccc; padding: 8px;">7 束 以上</td>
             <td style="border: 1px solid #ccc; padding: 8px;">50％ 以上</td>
           </tr>
